@@ -210,7 +210,13 @@
                             desc: "Crispy on the bottom, juicy on the inside. Pan-fried dumplings filled with Kurobuta pork, cabbage, and ginger. Served with our house-made rayu soy dipping sauce.",
                             img: "https://images.unsplash.com/photo-1541529086526-db283c563270?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
                         }
-                    ]
+                    ],
+                    side: {
+                        name: "Handmade Gyoza (6 pcs)",
+                        price: "NT$120",
+                        desc: "Crispy on the bottom, juicy on the inside. Pan-fried dumplings filled with Kurobuta pork, cabbage, and ginger. Served with our house-made rayu soy dipping sauce.",
+                        img: "https://images.unsplash.com/photo-1541529086526-db283c563270?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    }
                 },
                 menuPage: {
                     title: "Order Your Bowl",
@@ -305,7 +311,13 @@
                             desc: "底部金黃酥脆，內餡多汁。包入黑豬肉、高麗菜與生薑的日式煎餃。搭配自製辣油醬油。",
                             img: "https://images.unsplash.com/photo-1541529086526-db283c563270?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
                         }
-                    ]
+                    ],
+                    side: {
+                        name: "手工煎餃 (6顆)",
+                        price: "NT$120",
+                        desc: "底部金黃酥脆，內餡多汁。包入黑豬肉、高麗菜與生薑的日式煎餃。搭配自製辣油醬油。",
+                        img: "https://images.unsplash.com/photo-1541529086526-db283c563270?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    }
                 },
                 menuPage: {
                     title: "訂購您的碗麵\u0020",
@@ -668,7 +680,7 @@
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
                                     
                                     {/* Mapping over standard menu items */}
-                                    {t.menu.items.map((item, index) => (
+                                    {(t.menu.items || []).map((item, index) => item ? (
                                         <div key={index} className="menu-card bg-cream rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-full relative">
                                             {index === 1 && (
                                                 <div className="absolute top-4 right-4 bg-wood text-white text-xs font-bold px-3 py-1 rounded-full z-10 uppercase tracking-wide">
@@ -687,26 +699,28 @@
                                                 </button>
                                             </div>
                                         </div>
-                                    ))}
+                                    ) : null)}
 
                                     {/* Side Item (Gyoza) */}
-                                    <div className="menu-card bg-cream rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-full lg:col-span-3 lg:flex-row">
-                                        <div className="lg:w-1/3">
-                                            <img src={t.menu.side.img} alt={t.menu.side.name} className="w-full h-64 lg:h-full object-cover" />
-                                        </div>
-                                        <div className="p-8 lg:w-2/3 flex flex-col justify-center">
-                                            <div className="flex justify-between items-start mb-4 flex-col sm:flex-row">
-                                                <h4 className="text-2xl font-serif font-bold text-charcoal mb-2 sm:mb-0">{t.menu.side.name}</h4>
-                                                <span className="text-crimson font-bold text-xl sm:ml-4">{t.menu.side.price}</span>
+                                    {t.menu.side && (
+                                        <div className="menu-card bg-cream rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-full lg:col-span-3 lg:flex-row">
+                                            <div className="lg:w-1/3">
+                                                <img src={t.menu.side.img} alt={t.menu.side.name} className="w-full h-64 lg:h-full object-cover" />
                                             </div>
-                                            <p className="text-gray-600 font-light mb-6 text-lg">{t.menu.side.desc}</p>
-                                            <div className="flex gap-4">
-                                                <button className="btn-fillup w-full sm:w-auto px-8 py-3 bg-charcoal text-white font-medium rounded-full hover:bg-black transition-colors">
-                                                    {t.menu.add}
-                                                </button>
+                                            <div className="p-8 lg:w-2/3 flex flex-col justify-center">
+                                                <div className="flex justify-between items-start mb-4 flex-col sm:flex-row">
+                                                    <h4 className="text-2xl font-serif font-bold text-charcoal mb-2 sm:mb-0">{t.menu.side.name}</h4>
+                                                    <span className="text-crimson font-bold text-xl sm:ml-4">{t.menu.side.price}</span>
+                                                </div>
+                                                <p className="text-gray-600 font-light mb-6 text-lg">{t.menu.side.desc}</p>
+                                                <div className="flex gap-4">
+                                                    <button className="btn-fillup w-full sm:w-auto px-8 py-3 bg-charcoal text-white font-medium rounded-full hover:bg-black transition-colors">
+                                                        {t.menu.add}
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    )}
 
                                 </div>
                             </div>
@@ -798,7 +812,7 @@
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
-                                            {t.menu.items.map((item, index) => (
+                                            {(t.menu.items || []).map((item, index) => item ? (
                                                 <div key={index} className="menu-card bg-cream rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-full relative">
                                                     {index === 1 && (
                                                         <div className="absolute top-4 right-4 bg-wood text-white text-xs font-bold px-3 py-1 rounded-full z-10 uppercase tracking-wide">
@@ -826,7 +840,7 @@
                                                         )}
                                                     </div>
                                                 </div>
-                                            ))}
+                                            ) : null)}
                                         </div>
                                     </div>
                                 </section>
