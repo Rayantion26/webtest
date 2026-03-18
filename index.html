@@ -375,6 +375,7 @@
             const [isCartOpen, setIsCartOpen] = useState(false);
 
             const t = translations[lang];
+            const totalItems = getTotalItems();
 
             const toggleLanguage = () => {
                 setLang(prev => prev === 'en' ? 'zh' : 'en');
@@ -406,6 +407,10 @@
                 return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
             };
 
+            const getTotalItems = () => {
+                return cart.reduce((total, item) => total + (item.quantity || 0), 0);
+            };
+
             const generateOrderImage = async () => {
                 const element = document.getElementById('order-summary');
                 if (!element) return null;
@@ -424,7 +429,7 @@
             };
 
             const handleWhatsAppShare = async () => {
-                if (cart.length === 0) {
+                if (getTotalItems() === 0) {
                     alert(t.menuPage.emptyCart);
                     return;
                 }
@@ -497,7 +502,7 @@
                                     <div className="relative">
                                         <button onClick={() => setIsCartOpen(!isCartOpen)} className="flex items-center gap-2 text-charcoal hover:text-crimson transition-colors relative p-2">
                                             <i className="ph ph-shopping-cart text-2xl"></i>
-                                            {cart.length > 0 && <span className="cart-badge">{cart.length}</span>}
+                                            {totalItems > 0 && <span className="cart-badge">{totalItems}</span>}
                                         </button>
                                     </div>
                                     
@@ -514,7 +519,7 @@
                                     <div className="relative">
                                         <button onClick={() => setIsCartOpen(!isCartOpen)} className="flex items-center gap-2 text-charcoal hover:text-crimson transition-colors relative">
                                             <i className="ph ph-shopping-cart text-2xl"></i>
-                                            {cart.length > 0 && <span className="cart-badge">{cart.length}</span>}
+                                            {totalItems > 0 && <span className="cart-badge">{totalItems}</span>}
                                         </button>
                                     </div>
 
@@ -668,60 +673,42 @@
                             </div>
                         </section>
 
-                        {/* Menu Section */}
+                        {/* Menu Call-to-Action Section */}
                         <section id="menu" className="py-20 md:py-32 bg-white">
-                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                                <div className="text-center max-w-3xl mx-auto mb-16">
+                            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                                <div className="text-center">
                                     <h2 className="text-crimson font-medium tracking-widest uppercase text-sm mb-3">{t.menu.label}</h2>
                                     <h3 className="text-3xl md:text-5xl font-serif font-bold text-charcoal mb-6">{t.menu.title}</h3>
-                                    <p className="text-gray-600 text-lg font-light">{t.menu.desc}</p>
-                                </div>
+                                    <p className="text-gray-600 text-lg font-light mb-10">{t.menu.desc}</p>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
-                                    
-                                    {/* Mapping over standard menu items */}
-                                    {(t.menu.items || []).map((item, index) => item ? (
-                                        <div key={index} className="menu-card bg-cream rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-full relative">
-                                            {index === 1 && (
-                                                <div className="absolute top-4 right-4 bg-wood text-white text-xs font-bold px-3 py-1 rounded-full z-10 uppercase tracking-wide">
-                                                    {t.menu.pick}
-                                                </div>
-                                            )}
-                                            <img src={item.img} alt={item.name} className="w-full h-64 object-cover" />
-                                            <div className="p-8 flex flex-col flex-grow">
-                                                <div className="flex justify-between items-start mb-4">
-                                                    <h4 className="text-xl font-serif font-bold text-charcoal">{item.name}</h4>
-                                                    <span className="text-crimson font-bold text-xl ml-4 whitespace-nowrap">{item.price}</span>
-                                                </div>
-                                                <p className="text-gray-600 font-light mb-6 flex-grow">{item.desc}</p>
-                                                <button className="w-full py-3 border border-crimson text-crimson font-medium rounded-full hover:bg-crimson hover:text-white transition-colors">
-                                                    {t.menu.pickup}
-                                                </button>
-                                            </div>
+                                    <div className="inline-flex flex-col sm:flex-row justify-center items-center gap-4">
+                                        <button onClick={() => setCurrentPage('menu')} className="btn-fillup bg-crimson text-white px-10 py-4 rounded-full font-medium hover:bg-red-800 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+                                            <i className="ph ph-book-open text-xl"></i>
+                                            {lang === 'en' ? 'View Full Menu' : '查看完整菜單'}
+                                        </button>
+                                        <a href="#contact" className="bg-white/10 border border-gray-200 text-charcoal px-10 py-4 rounded-full font-medium hover:bg-white/30 transition-all">
+                                            {lang === 'en' ? 'Find Us' : '店鋪資訊'}
+                                        </a>
+                                    </div>
+
+                                    <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                        <div className="bg-cream/70 rounded-3xl p-8 shadow-lg">
+                                            <h4 className="text-xl font-semibold text-charcoal mb-3">{lang === 'en' ? 'Why choose us?' : '為什麼選擇我們？'}</h4>
+                                            <ul className="space-y-2 text-gray-600 font-light">
+                                                <li className="flex items-start gap-2"><span className="text-crimson">•</span>{lang === 'en' ? '18-hour simmered broth' : '18小時慢火熬煮湯頭'}</li>
+                                                <li className="flex items-start gap-2"><span className="text-crimson">•</span>{lang === 'en' ? 'Handmade noodles daily' : '每日新鮮手工麵'}</li>
+                                                <li className="flex items-start gap-2"><span className="text-crimson">•</span>{lang === 'en' ? 'Perfect balance of umami and spice' : '濃醇鮮味與適度辛香'}</li>
+                                            </ul>
                                         </div>
-                                    ) : null)}
-
-                                    {/* Side Item (Gyoza) */}
-                                    {t.menu.side && (
-                                        <div className="menu-card bg-cream rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-full lg:col-span-3 lg:flex-row">
-                                            <div className="lg:w-1/3">
-                                                <img src={t.menu.side.img} alt={t.menu.side.name} className="w-full h-64 lg:h-full object-cover" />
-                                            </div>
-                                            <div className="p-8 lg:w-2/3 flex flex-col justify-center">
-                                                <div className="flex justify-between items-start mb-4 flex-col sm:flex-row">
-                                                    <h4 className="text-2xl font-serif font-bold text-charcoal mb-2 sm:mb-0">{t.menu.side.name}</h4>
-                                                    <span className="text-crimson font-bold text-xl sm:ml-4">{t.menu.side.price}</span>
-                                                </div>
-                                                <p className="text-gray-600 font-light mb-6 text-lg">{t.menu.side.desc}</p>
-                                                <div className="flex gap-4">
-                                                    <button className="btn-fillup w-full sm:w-auto px-8 py-3 bg-charcoal text-white font-medium rounded-full hover:bg-black transition-colors">
-                                                        {t.menu.add}
-                                                    </button>
-                                                </div>
-                                            </div>
+                                        <div className="bg-cream/70 rounded-3xl p-8 shadow-lg">
+                                            <h4 className="text-xl font-semibold text-charcoal mb-3">{lang === 'en' ? 'How to order' : '下單步驟'}</h4>
+                                            <ol className="list-decimal list-inside text-gray-600 font-light space-y-2">
+                                                <li>{lang === 'en' ? 'Click the button above' : '點擊上方按鈕'}</li>
+                                                <li>{lang === 'en' ? 'Add dishes to your cart' : '加入餐點到購物車'}</li>
+                                                <li>{lang === 'en' ? 'Send your order via WhatsApp' : '透過 WhatsApp 送出訂單'}</li>
+                                            </ol>
                                         </div>
-                                    )}
-
+                                    </div>
                                 </div>
                             </div>
                         </section>
