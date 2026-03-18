@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tengu Ramen | Authentic Tokyo Bowls</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#FAFAF8',
+                        charcoal: '#1F2937',
+                        crimson: '#9B2226',
+                        wood: '#D4A373'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- React & Babel for in-browser compilation -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body {
+            background-color: #FAFAF8;
+            color: #1F2937;
+        }
+        .hero-overlay {
+            background: linear-gradient(to right, rgba(31, 41, 55, 0.9) 0%, rgba(31, 41, 55, 0.4) 100%);
+        }
+        .menu-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="antialiased font-sans selection:bg-crimson selection:text-white">
+
+    <!-- React Root Entry Point -->
+    <div id="root"></div>
+
+    <!-- React Application Code -->
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- i18n Dictionary ---
+        const translations = {
+            en: {
+                nav: { story: "Our Story", menu: "Menu", reviews: "Reviews", visit: "Visit Us", toggleLang: "中文" },
+                hero: {
+                    welcome: "Welcome to Tengu",
+                    title1: "Authentic Tokyo Bowls,",
+                    title2: "Deep in the Heart of Taipei.",
+                    desc: "Rich, 18-hour simmered tonkotsu broth, handmade noodles, and a soulful atmosphere. Your journey to Japan begins with a single slurp.",
+                    btnMenu: "View Menu",
+                    btnFind: "Find Us"
+                },
+                about: {
+                    label: "Our Story",
+                    title: "Crafting the Perfect Slurp",
+                    p1: "Tengu Ramen was born from a singular passion: the pursuit of the perfect broth. Our founder, Chef Kenji, spent a decade in Tokyo mastering the delicate balance of pork bones, water, and fire.",
+                    p2: "We bring those traditional, uncompromised techniques straight to the bustling streets of Taipei. Every bowl we serve is a labor of love, featuring our signature 18-hour tonkotsu broth, custom-crafted artisan noodles, and perfectly tender chashu that melts in your mouth.",
+                    p3: "It’s not just food; it’s a craft. Every bowl is a story.",
+                    simmering: "Broth Simmering",
+                    chef: "Chef Kenji"
+                },
+                menu: {
+                    label: "Our Offerings",
+                    title: "The Tengu Menu",
+                    desc: "Simple, focused, and perfected. Choose your flavor journey.",
+                    pickup: "Order for Pickup",
+                    add: "Add to Order",
+                    pick: "Chef's Pick",
+                    items: [
+                        {
+                            name: "Signature Tonkotsu",
+                            price: "NT$280",
+                            desc: "Our pride and joy. 18-hour pork bone broth, thin straight noodles, pork belly chashu, wood ear mushrooms, and fresh scallions.",
+                            img: "https://images.unsplash.com/photo-1552611052-33e04de081de?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                        },
+                        {
+                            name: "Spicy Kuro Miso",
+                            price: "NT$320",
+                            desc: "A rich blend of our tonkotsu broth, black garlic oil, and a secret spicy miso paste. Topped with spicy ground pork and an ajitsuke tamago (soft boiled egg).",
+                            img: "https://images.unsplash.com/photo-1614563637806-1d0e645e0940?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" // Fixed Image
+                        },
+                        {
+                            name: "Truffle Shio",
+                            price: "NT$350",
+                            desc: "A lighter, clear chicken and seafood broth seasoned with sea salt and infused with white truffle oil. Served with sous-vide chicken breast.",
+                            img: "https://images.unsplash.com/photo-1591814468924-caf88d1232e1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                        }
+                    ],
+                    side: {
+                        name: "Handmade Gyoza (6 pcs)",
+                        price: "NT$120",
+                        desc: "Crispy on the bottom, juicy on the inside. Pan-fried dumplings filled with Kurobuta pork, cabbage, and ginger. Served with our house-made rayu soy dipping sauce.",
+                        img: "https://images.unsplash.com/photo-1541529086526-db283c563270?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    }
+                },
+                reviews: {
+                    title: "What Our Guests Say",
+                    r1: "Easily the best ramen I've had outside of Tokyo. The broth is incredibly rich without being heavy, and the noodles have the perfect chew. The ambiance makes you forget you're in Taipei.",
+                    r1Auth: "Alice Chen",
+                    r1Role: "Local Guide",
+                    r2: "The Spicy Kuro Miso is a revelation. The balance of heat, umami, and the garlic oil is perfection. Expect a small line during peak hours, but it moves fast and is 100% worth the wait.",
+                    r2Auth: "Mark Lin",
+                    r2Role: "Food Blogger",
+                    r3: "Stumbled upon this hidden gem in the alleyways of Zhongxiao East Rd. The staff greets you warmly (Irasshaimase!), and the Truffle Shio is delicate and aromatic. Will be returning soon!",
+                    r3Auth: "Sarah Jenkins",
+                    r3Role: "Tourist"
+                },
+                footer: {
+                    desc: "Bringing the authentic taste and soul of Tokyo's ramen culture to the heart of Taipei.",
+                    find: "Find Us",
+                    address: "No. 123, Sec. 2, Zhongxiao E. Rd.,<br>Da'an District, Taipei City",
+                    hours: "Opening Hours",
+                    days1: "Mon - Thu",
+                    days2: "Fri - Sat",
+                    sun: "Sunday",
+                    closed: "Closed",
+                    updates: "Stay Updated",
+                    subDesc: "Join our newsletter for secret menu drops and events.",
+                    subBtn: "Subscribe",
+                    email: "Your email address",
+                    rights: "© 2024 Tengu Ramen Taipei. All rights reserved.",
+                    alert: "Thanks for subscribing!"
+                }
+            },
+            zh: {
+                nav: { story: "品牌故事", menu: "精選菜單", reviews: "顧客評價", visit: "聯絡我們", toggleLang: "EN" },
+                hero: {
+                    welcome: "歡迎來到天狗拉麵",
+                    title1: "正宗東京道地風味，",
+                    title2: "隱身台北市中心。",
+                    desc: "歷經18小時熬煮的濃郁豚骨湯頭，搭配職人手工麵條，以及充滿靈魂的用餐氛圍。您的日本美食之旅，從這第一口熱湯開始。",
+                    btnMenu: "查看菜單",
+                    btnFind: "店鋪資訊"
+                },
+                about: {
+                    label: "品牌故事",
+                    title: "匠心獨具的完美體驗",
+                    p1: "天狗拉麵誕生於一個單純的執念：追求最完美的湯頭。我們的創辦人，健司主廚，在東京花費了十年的時間，只為掌握豚骨、水與火候之間的微妙平衡。",
+                    p2: "我們將這些傳統、不妥協的技術直接帶到了熙來攘往的台北街頭。我們端出的每一碗麵都是心血結晶，以招牌的18小時熬煮豚骨湯底、特製手工麵條，以及入口即化的叉燒肉為特色。",
+                    p3: "這不僅僅是食物，這是一門工藝。每一碗拉麵，都有它的故事。",
+                    simmering: "小火慢熬湯底",
+                    chef: "健司 主廚"
+                },
+                menu: {
+                    label: "我們的餐點",
+                    title: "天狗菜單",
+                    desc: "簡單、專注、完美。請選擇您的風味之旅。",
+                    pickup: "線上點餐",
+                    add: "加入訂單",
+                    pick: "主廚推薦",
+                    items: [
+                        {
+                            name: "招牌豚骨拉麵",
+                            price: "NT$280",
+                            desc: "我們的驕傲。18小時熬煮豚骨高湯、細直麵、豬五花叉燒、黑木耳與新鮮蔥花。",
+                            img: "https://images.unsplash.com/photo-1552611052-33e04de081de?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                        },
+                        {
+                            name: "辛黑味噌拉麵",
+                            price: "NT$320",
+                            desc: "濃郁的豚骨高湯、黑蒜油與秘製辛味噌完美結合。搭配辣味絞肉與溏心蛋。",
+                            img: "https://images.unsplash.com/photo-1614563637806-1d0e645e0940?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" // Fixed Image
+                        },
+                        {
+                            name: "松露鹽味拉麵",
+                            price: "NT$350",
+                            desc: "清爽的雞骨與海鮮清湯，以海鹽調味並注入白松露油。搭配舒肥雞胸肉。",
+                            img: "https://images.unsplash.com/photo-1591814468924-caf88d1232e1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                        }
+                    ],
+                    side: {
+                        name: "手工煎餃 (6顆)",
+                        price: "NT$120",
+                        desc: "底部金黃酥脆，內餡多汁。包入黑豬肉、高麗菜與生薑的日式煎餃。搭配自製辣油醬油。",
+                        img: "https://images.unsplash.com/photo-1541529086526-db283c563270?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    }
+                },
+                reviews: {
+                    title: "顧客的真實評價",
+                    r1: "這絕對是我在東京以外吃過最棒的拉麵。湯頭濃郁卻不膩口，麵條嚼勁十足。這裡的氣氛會讓你忘記自己身在台北。",
+                    r1Auth: "Alice Chen",
+                    r1Role: "在地嚮導",
+                    r2: "辛黑味噌拉麵令人驚豔！辣味、鮮味與蒜油的平衡堪稱完美。尖峰時段需要排隊，但隊伍前進得很快，絕對值得等待。",
+                    r2Auth: "Mark Lin",
+                    r2Role: "美食部落客",
+                    r3: "在忠孝東路的巷弄裡偶然發現這間隱藏版美食。店員親切地用日文打招呼，松露鹽味拉麵香氣四溢、口感細緻。一定會再訪！",
+                    r3Auth: "Sarah Jenkins",
+                    r3Role: "遊客"
+                },
+                footer: {
+                    desc: "將東京拉麵文化的道地滋味與靈魂，帶到台北的市中心。",
+                    find: "店鋪資訊",
+                    address: "台北市大安區<br>忠孝東路二段123號",
+                    hours: "營業時間",
+                    days1: "週一至週四",
+                    days2: "週五至週六",
+                    sun: "星期日",
+                    closed: "公休",
+                    updates: "訂閱最新消息",
+                    subDesc: "加入我們的電子報，獲取隱藏菜單與活動資訊。",
+                    subBtn: "訂閱",
+                    email: "您的電子郵件",
+                    rights: "© 2024 天狗拉麵 台北. 版權所有.",
+                    alert: "感謝您的訂閱！"
+                }
+            }
+        };
+
+        // --- Main App Component ---
+        const App = () => {
+            const [lang, setLang] = useState('en');
+            const [isScrolled, setIsScrolled] = useState(false);
+            const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+            const t = translations[lang];
+
+            const toggleLanguage = () => {
+                setLang(prev => prev === 'en' ? 'zh' : 'en');
+            };
+
+            useEffect(() => {
+                const handleScroll = () => {
+                    setIsScrolled(window.scrollY > 20);
+                };
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            return (
+                <div className="antialiased font-sans selection:bg-crimson selection:text-white">
+                    {/* Navigation */}
+                    <nav className={`fixed w-full z-50 transition-all duration-300 bg-cream/90 backdrop-blur-md border-b border-gray-200 ${isScrolled ? 'shadow-md py-2' : 'py-4'}`}>
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-16">
+                                {/* Logo */}
+                                <div className="flex-shrink-0 flex items-center">
+                                    <a href="#" className="font-serif text-2xl font-bold tracking-tight text-crimson flex items-center gap-2">
+                                        <i className="ph ph-bowl-food text-3xl"></i>
+                                        Tengu Ramen
+                                    </a>
+                                </div>
+                                
+                                {/* Desktop Menu */}
+                                <div className="hidden md:flex space-x-8 items-center">
+                                    <a href="#about" className="text-charcoal hover:text-crimson transition-colors font-medium">{t.nav.story}</a>
+                                    <a href="#menu" className="text-charcoal hover:text-crimson transition-colors font-medium">{t.nav.menu}</a>
+                                    <a href="#reviews" className="text-charcoal hover:text-crimson transition-colors font-medium">{t.nav.reviews}</a>
+                                    <a href="#contact" className="bg-crimson text-white px-6 py-2.5 rounded-full hover:bg-red-800 transition-colors font-medium shadow-sm">{t.nav.visit}</a>
+                                    
+                                    {/* Language Toggle Desktop */}
+                                    <button onClick={toggleLanguage} className="flex items-center gap-1 text-gray-500 hover:text-crimson transition-colors font-bold border-l border-gray-300 pl-6 ml-2">
+                                        <i className="ph ph-globe text-xl"></i>
+                                        {t.nav.toggleLang}
+                                    </button>
+                                </div>
+
+                                {/* Mobile Menu Button */}
+                                <div className="md:hidden flex items-center gap-4">
+                                    {/* Language Toggle Mobile */}
+                                    <button onClick={toggleLanguage} className="flex items-center gap-1 text-gray-500 hover:text-crimson transition-colors font-bold">
+                                        <i className="ph ph-globe text-xl"></i>
+                                        {t.nav.toggleLang}
+                                    </button>
+                                    
+                                    <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-charcoal hover:text-crimson focus:outline-none p-2">
+                                        <i className={`ph ${isMobileMenuOpen ? 'ph-x' : 'ph-list'} text-3xl`}></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Mobile Menu Dropdown */}
+                        {isMobileMenuOpen && (
+                            <div className="md:hidden bg-cream border-t border-gray-200 absolute w-full shadow-lg">
+                                <div className="px-4 pt-2 pb-6 space-y-1 flex flex-col">
+                                    <a href="#about" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-4 text-base font-medium text-charcoal hover:text-crimson border-b border-gray-100">{t.nav.story}</a>
+                                    <a href="#menu" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-4 text-base font-medium text-charcoal hover:text-crimson border-b border-gray-100">{t.nav.menu}</a>
+                                    <a href="#reviews" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-4 text-base font-medium text-charcoal hover:text-crimson border-b border-gray-100">{t.nav.reviews}</a>
+                                    <a href="#contact" onClick={() => setIsMobileMenuOpen(false)} className="block mt-4 text-center bg-crimson text-white px-6 py-3 rounded-full hover:bg-red-800 transition-colors font-medium">{t.nav.visit}</a>
+                                </div>
+                            </div>
+                        )}
+                    </nav>
+
+                    {/* Hero Section */}
+                    <section className="relative h-screen flex items-center justify-center pt-20">
+                        <div className="absolute inset-0 z-0">
+                            <img src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" alt="Steaming bowl of ramen" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 hero-overlay"></div>
+                        </div>
+
+                        <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto mt-10">
+                            <span className="block text-wood font-medium tracking-widest uppercase mb-4 text-sm md:text-base">{t.hero.welcome}</span>
+                            <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold text-white leading-tight mb-6 drop-shadow-lg">
+                                {t.hero.title1} <br />
+                                <span className="italic text-wood">{t.hero.title2}</span>
+                            </h1>
+                            <p className="mt-4 text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto font-light">
+                                {t.hero.desc}
+                            </p>
+                            <div className="flex flex-col sm:flex-row justify-center gap-4">
+                                <a href="#menu" className="bg-crimson text-white px-8 py-4 rounded-full font-medium hover:bg-red-800 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+                                    <i className="ph ph-book-open text-xl"></i>
+                                    {t.hero.btnMenu}
+                                </a>
+                                <a href="#contact" className="bg-white/10 backdrop-blur-md border border-white/30 text-white px-8 py-4 rounded-full font-medium hover:bg-white/20 transition-all flex items-center justify-center gap-2">
+                                    <i className="ph ph-map-pin text-xl"></i>
+                                    {t.hero.btnFind}
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* About Section */}
+                    <section id="about" className="py-20 md:py-32 bg-cream">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 items-center">
+                                <div className="relative">
+                                    <img src="https://images.unsplash.com/photo-1585032226651-759b368d7246?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Chef preparing ramen" className="rounded-2xl shadow-2xl object-cover h-[500px] w-full" />
+                                    <div className="absolute -bottom-6 -right-6 bg-white p-6 rounded-xl shadow-xl hidden md:block border border-gray-100">
+                                        <p className="font-serif text-4xl text-crimson font-bold">18<span className="text-2xl text-charcoal font-sans">hrs</span></p>
+                                        <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">{t.about.simmering}</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h2 className="text-crimson font-medium tracking-widest uppercase text-sm mb-3">{t.about.label}</h2>
+                                    <h3 className="text-3xl md:text-5xl font-serif font-bold text-charcoal mb-6 leading-tight">{t.about.title}</h3>
+                                    <div className="space-y-4 text-gray-600 leading-relaxed text-lg font-light">
+                                        <p>{t.about.p1}</p>
+                                        <p>{t.about.p2}</p>
+                                        <p>{t.about.p3}</p>
+                                    </div>
+                                    <div className="mt-8">
+                                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Signature_of_Kenji_Goto.svg/512px-Signature_of_Kenji_Goto.svg.png" alt="Chef Signature" className="h-12 opacity-60 mix-blend-multiply" onError={(e) => e.target.style.display='none'} />
+                                        <p className="mt-2 font-serif font-bold text-charcoal">{t.about.chef}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Menu Section */}
+                    <section id="menu" className="py-20 md:py-32 bg-white">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="text-center max-w-3xl mx-auto mb-16">
+                                <h2 className="text-crimson font-medium tracking-widest uppercase text-sm mb-3">{t.menu.label}</h2>
+                                <h3 className="text-3xl md:text-5xl font-serif font-bold text-charcoal mb-6">{t.menu.title}</h3>
+                                <p className="text-gray-600 text-lg font-light">{t.menu.desc}</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
+                                
+                                {/* Mapping over standard menu items */}
+                                {t.menu.items.map((item, index) => (
+                                    <div key={index} className="menu-card bg-cream rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-full relative">
+                                        {index === 1 && (
+                                            <div className="absolute top-4 right-4 bg-wood text-white text-xs font-bold px-3 py-1 rounded-full z-10 uppercase tracking-wide">
+                                                {t.menu.pick}
+                                            </div>
+                                        )}
+                                        <img src={item.img} alt={item.name} className="w-full h-64 object-cover" />
+                                        <div className="p-8 flex flex-col flex-grow">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <h4 className="text-xl font-serif font-bold text-charcoal">{item.name}</h4>
+                                                <span className="text-crimson font-bold text-xl ml-4 whitespace-nowrap">{item.price}</span>
+                                            </div>
+                                            <p className="text-gray-600 font-light mb-6 flex-grow">{item.desc}</p>
+                                            <button className="w-full py-3 border border-crimson text-crimson font-medium rounded-full hover:bg-crimson hover:text-white transition-colors">
+                                                {t.menu.pickup}
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {/* Side Item (Gyoza) */}
+                                <div className="menu-card bg-cream rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-full lg:col-span-3 lg:flex-row">
+                                    <div className="lg:w-1/3">
+                                        <img src={t.menu.side.img} alt={t.menu.side.name} className="w-full h-64 lg:h-full object-cover" />
+                                    </div>
+                                    <div className="p-8 lg:w-2/3 flex flex-col justify-center">
+                                        <div className="flex justify-between items-start mb-4 flex-col sm:flex-row">
+                                            <h4 className="text-2xl font-serif font-bold text-charcoal mb-2 sm:mb-0">{t.menu.side.name}</h4>
+                                            <span className="text-crimson font-bold text-xl sm:ml-4">{t.menu.side.price}</span>
+                                        </div>
+                                        <p className="text-gray-600 font-light mb-6 text-lg">{t.menu.side.desc}</p>
+                                        <div className="flex gap-4">
+                                            <button className="w-full sm:w-auto px-8 py-3 bg-charcoal text-white font-medium rounded-full hover:bg-black transition-colors">
+                                                {t.menu.add}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Reviews Section */}
+                    <section id="reviews" className="py-20 md:py-32 bg-cream">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="text-center max-w-3xl mx-auto mb-16">
+                                <i className="ph-fill ph-quotes text-5xl text-wood/40 mb-4 inline-block"></i>
+                                <h3 className="text-3xl md:text-5xl font-serif font-bold text-charcoal mb-6">{t.reviews.title}</h3>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                {[
+                                    { text: t.reviews.r1, auth: t.reviews.r1Auth, role: t.reviews.r1Role, init: "AC" },
+                                    { text: t.reviews.r2, auth: t.reviews.r2Auth, role: t.reviews.r2Role, init: "ML" },
+                                    { text: t.reviews.r3, auth: t.reviews.r3Auth, role: t.reviews.r3Role, init: "SJ" }
+                                ].map((review, i) => (
+                                    <div key={i} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                                        <div className="flex text-wood mb-4 gap-1">
+                                            <i className="ph-fill ph-star"></i><i className="ph-fill ph-star"></i><i className="ph-fill ph-star"></i><i className="ph-fill ph-star"></i><i className="ph-fill ph-star"></i>
+                                        </div>
+                                        <p className="text-gray-600 font-light italic mb-6">"{review.text}"</p>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold text-gray-500">{review.init}</div>
+                                            <div>
+                                                <p className="text-sm font-bold text-charcoal">{review.auth}</p>
+                                                <p className="text-xs text-gray-400">{review.role}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Contact & Footer Section */}
+                    <section id="contact" className="bg-charcoal text-white pt-20 pb-10">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16 border-b border-gray-700 pb-16">
+                                
+                                <div className="lg:col-span-1">
+                                    <a href="#" className="font-serif text-3xl font-bold tracking-tight text-white flex items-center gap-2 mb-6">
+                                        <i className="ph ph-bowl-food text-crimson"></i>
+                                        Tengu
+                                    </a>
+                                    <p className="text-gray-400 font-light mb-6">{t.footer.desc}</p>
+                                    <div className="flex gap-4">
+                                        <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-crimson transition-colors"><i className="ph ph-instagram-logo text-xl"></i></a>
+                                        <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-crimson transition-colors"><i className="ph ph-facebook-logo text-xl"></i></a>
+                                        <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-crimson transition-colors"><i className="ph ph-twitter-logo text-xl"></i></a>
+                                    </div>
+                                </div>
+
+                                <div className="lg:col-span-1">
+                                    <h4 className="font-serif text-xl font-bold mb-6 text-wood">{t.footer.find}</h4>
+                                    <ul className="space-y-4 text-gray-300 font-light">
+                                        <li className="flex items-start gap-3">
+                                            <i className="ph ph-map-pin text-xl text-crimson mt-1"></i>
+                                            <span dangerouslySetInnerHTML={{ __html: t.footer.address }}></span>
+                                        </li>
+                                        <li className="flex items-center gap-3">
+                                            <i className="ph ph-phone text-xl text-crimson"></i>
+                                            <span>+886 2 1234 5678</span>
+                                        </li>
+                                        <li className="flex items-center gap-3">
+                                            <i className="ph ph-envelope text-xl text-crimson"></i>
+                                            <span>hello@tenguramen.tw</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div className="lg:col-span-1">
+                                    <h4 className="font-serif text-xl font-bold mb-6 text-wood">{t.footer.hours}</h4>
+                                    <ul className="space-y-4 text-gray-300 font-light">
+                                        <li className="flex justify-between border-b border-gray-700 pb-2">
+                                            <span>{t.footer.days1}</span>
+                                            <span className="text-right">11:30 - 14:30<br/>17:30 - 21:30</span>
+                                        </li>
+                                        <li className="flex justify-between border-b border-gray-700 pb-2">
+                                            <span>{t.footer.days2}</span>
+                                            <span className="text-right">11:30 - 15:00<br/>17:30 - 22:30</span>
+                                        </li>
+                                        <li className="flex justify-between pb-2 text-crimson">
+                                            <span>{t.footer.sun}</span>
+                                            <span>{t.footer.closed}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div className="lg:col-span-1">
+                                    <h4 className="font-serif text-xl font-bold mb-6 text-wood">{t.footer.updates}</h4>
+                                    <p className="text-gray-400 font-light mb-4">{t.footer.subDesc}</p>
+                                    <form onSubmit={(e) => { e.preventDefault(); alert(t.footer.alert); }} className="flex flex-col gap-3">
+                                        <input type="email" placeholder={t.footer.email} required className="bg-gray-800 border border-gray-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-crimson transition-colors" />
+                                        <button type="submit" className="bg-crimson text-white px-4 py-3 rounded-lg font-medium hover:bg-red-800 transition-colors">{t.footer.subBtn}</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div className="text-center text-gray-500 text-sm">
+                                <p>{t.footer.rights}</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
