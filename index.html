@@ -28,6 +28,15 @@
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                         serif: ['Playfair Display', 'serif'],
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
                     }
                 }
             }
@@ -68,7 +77,7 @@
         // --- i18n Dictionary ---
         const translations = {
             en: {
-                nav: { story: "Our Story", menu: "Menu", reviews: "Reviews", visit: "Visit Us", toggleLang: "中文" },
+                nav: { logo: "Tengu Ramen EN", story: "Our Story", menu: "Menu", reviews: "Reviews", visit: "Visit Us", toggleLang: "中文" },
                 hero: {
                     welcome: "Welcome to Tengu",
                     title1: "Authentic Tokyo Bowls,",
@@ -150,7 +159,7 @@
                 }
             },
             zh: {
-                nav: { story: "品牌故事", menu: "精選菜單", reviews: "顧客評價", visit: "聯絡我們", toggleLang: "EN" },
+                nav: { logo: "天狗拉麵 中文", story: "品牌故事", menu: "精選菜單", reviews: "顧客評價", visit: "聯絡我們", toggleLang: "EN" },
                 hero: {
                     welcome: "歡迎來到天狗拉麵",
                     title1: "正宗東京道地風味，",
@@ -235,8 +244,10 @@
 
         // --- Main App Component ---
         const App = () => {
-            const [lang, setLang] = useState('en');
+            const [lang, setLang] = useState('zh');
             const [isScrolled, setIsScrolled] = useState(false);
+            const [isVisible, setIsVisible] = useState(true);
+            const [lastScrollY, setLastScrollY] = useState(0);
             const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
             const t = translations[lang];
@@ -247,23 +258,30 @@
 
             useEffect(() => {
                 const handleScroll = () => {
-                    setIsScrolled(window.scrollY > 20);
+                    const currentScrollY = window.scrollY;
+                    if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                        setIsVisible(false);
+                    } else {
+                        setIsVisible(true);
+                    }
+                    setLastScrollY(currentScrollY);
+                    setIsScrolled(currentScrollY > 20);
                 };
-                window.addEventListener('scroll', handleScroll);
+                window.addEventListener('scroll', handleScroll, { passive: true });
                 return () => window.removeEventListener('scroll', handleScroll);
-            }, []);
+            }, [lastScrollY]);
 
             return (
                 <div className="antialiased font-sans selection:bg-crimson selection:text-white">
                     {/* Navigation */}
-                    <nav className={`fixed w-full z-50 transition-all duration-300 bg-cream/90 backdrop-blur-md border-b border-gray-200 ${isScrolled ? 'shadow-md py-2' : 'py-4'}`}>
+                    <nav className={`fixed w-full z-50 transition-transform duration-300 bg-cream/90 backdrop-blur-md border-b border-gray-200 ${isScrolled ? 'shadow-md py-2' : 'py-4'} ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div className="flex justify-between items-center h-16">
                                 {/* Logo */}
                                 <div className="flex-shrink-0 flex items-center">
                                     <a href="#" className="font-serif text-2xl font-bold tracking-tight text-crimson flex items-center gap-2">
                                         <i className="ph ph-bowl-food text-3xl"></i>
-                                        Tengu Ramen
+                                        {t.nav.logo}
                                     </a>
                                 </div>
                                 
@@ -309,220 +327,223 @@
                         )}
                     </nav>
 
-                    {/* Hero Section */}
-                    <section className="relative h-screen flex items-center justify-center pt-20">
-                        <div className="absolute inset-0 z-0">
-                            <img src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" alt="Steaming bowl of ramen" className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 hero-overlay"></div>
-                        </div>
-
-                        <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto mt-10">
-                            <span className="block text-wood font-medium tracking-widest uppercase mb-4 text-sm md:text-base">{t.hero.welcome}</span>
-                            <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold text-white leading-tight mb-6 drop-shadow-lg">
-                                {t.hero.title1} <br />
-                                <span className="italic text-wood">{t.hero.title2}</span>
-                            </h1>
-                            <p className="mt-4 text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto font-light">
-                                {t.hero.desc}
-                            </p>
-                            <div className="flex flex-col sm:flex-row justify-center gap-4">
-                                <a href="#menu" className="bg-crimson text-white px-8 py-4 rounded-full font-medium hover:bg-red-800 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
-                                    <i className="ph ph-book-open text-xl"></i>
-                                    {t.hero.btnMenu}
-                                </a>
-                                <a href="#contact" className="bg-white/10 backdrop-blur-md border border-white/30 text-white px-8 py-4 rounded-full font-medium hover:bg-white/20 transition-all flex items-center justify-center gap-2">
-                                    <i className="ph ph-map-pin text-xl"></i>
-                                    {t.hero.btnFind}
-                                </a>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* About Section */}
-                    <section id="about" className="py-20 md:py-32 bg-cream">
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 items-center">
-                                <div className="relative">
-                                    <img src="https://images.unsplash.com/photo-1585032226651-759b368d7246?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Chef preparing ramen" className="rounded-2xl shadow-2xl object-cover h-[500px] w-full" />
-                                    <div className="absolute -bottom-6 -right-6 bg-white p-6 rounded-xl shadow-xl hidden md:block border border-gray-100">
-                                        <p className="font-serif text-4xl text-crimson font-bold">18<span className="text-2xl text-charcoal font-sans">hrs</span></p>
-                                        <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">{t.about.simmering}</p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h2 className="text-crimson font-medium tracking-widest uppercase text-sm mb-3">{t.about.label}</h2>
-                                    <h3 className="text-3xl md:text-5xl font-serif font-bold text-charcoal mb-6 leading-tight">{t.about.title}</h3>
-                                    <div className="space-y-4 text-gray-600 leading-relaxed text-lg font-light">
-                                        <p>{t.about.p1}</p>
-                                        <p>{t.about.p2}</p>
-                                        <p>{t.about.p3}</p>
-                                    </div>
-                                    <div className="mt-8">
-                                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Signature_of_Kenji_Goto.svg/512px-Signature_of_Kenji_Goto.svg.png" alt="Chef Signature" className="h-12 opacity-60 mix-blend-multiply" onError={(e) => e.target.style.display='none'} />
-                                        <p className="mt-2 font-serif font-bold text-charcoal">{t.about.chef}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Menu Section */}
-                    <section id="menu" className="py-20 md:py-32 bg-white">
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="text-center max-w-3xl mx-auto mb-16">
-                                <h2 className="text-crimson font-medium tracking-widest uppercase text-sm mb-3">{t.menu.label}</h2>
-                                <h3 className="text-3xl md:text-5xl font-serif font-bold text-charcoal mb-6">{t.menu.title}</h3>
-                                <p className="text-gray-600 text-lg font-light">{t.menu.desc}</p>
+                    {/* Main Content (Animated on Language Change) */}
+                    <main key={lang} className="animate-fade-in">
+                        {/* Hero Section */}
+                        <section className="relative h-screen flex items-center justify-center pt-20">
+                            <div className="absolute inset-0 z-0">
+                                <img src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" alt="Steaming bowl of ramen" className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 hero-overlay"></div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
-                                
-                                {/* Mapping over standard menu items */}
-                                {t.menu.items.map((item, index) => (
-                                    <div key={index} className="menu-card bg-cream rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-full relative">
-                                        {index === 1 && (
-                                            <div className="absolute top-4 right-4 bg-wood text-white text-xs font-bold px-3 py-1 rounded-full z-10 uppercase tracking-wide">
-                                                {t.menu.pick}
-                                            </div>
-                                        )}
-                                        <img src={item.img} alt={item.name} className="w-full h-64 object-cover" />
-                                        <div className="p-8 flex flex-col flex-grow">
-                                            <div className="flex justify-between items-start mb-4">
-                                                <h4 className="text-xl font-serif font-bold text-charcoal">{item.name}</h4>
-                                                <span className="text-crimson font-bold text-xl ml-4 whitespace-nowrap">{item.price}</span>
-                                            </div>
-                                            <p className="text-gray-600 font-light mb-6 flex-grow">{item.desc}</p>
-                                            <button className="w-full py-3 border border-crimson text-crimson font-medium rounded-full hover:bg-crimson hover:text-white transition-colors">
-                                                {t.menu.pickup}
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-
-                                {/* Side Item (Gyoza) */}
-                                <div className="menu-card bg-cream rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-full lg:col-span-3 lg:flex-row">
-                                    <div className="lg:w-1/3">
-                                        <img src={t.menu.side.img} alt={t.menu.side.name} className="w-full h-64 lg:h-full object-cover" />
-                                    </div>
-                                    <div className="p-8 lg:w-2/3 flex flex-col justify-center">
-                                        <div className="flex justify-between items-start mb-4 flex-col sm:flex-row">
-                                            <h4 className="text-2xl font-serif font-bold text-charcoal mb-2 sm:mb-0">{t.menu.side.name}</h4>
-                                            <span className="text-crimson font-bold text-xl sm:ml-4">{t.menu.side.price}</span>
-                                        </div>
-                                        <p className="text-gray-600 font-light mb-6 text-lg">{t.menu.side.desc}</p>
-                                        <div className="flex gap-4">
-                                            <button className="w-full sm:w-auto px-8 py-3 bg-charcoal text-white font-medium rounded-full hover:bg-black transition-colors">
-                                                {t.menu.add}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Reviews Section */}
-                    <section id="reviews" className="py-20 md:py-32 bg-cream">
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="text-center max-w-3xl mx-auto mb-16">
-                                <i className="ph-fill ph-quotes text-5xl text-wood/40 mb-4 inline-block"></i>
-                                <h3 className="text-3xl md:text-5xl font-serif font-bold text-charcoal mb-6">{t.reviews.title}</h3>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                {[
-                                    { text: t.reviews.r1, auth: t.reviews.r1Auth, role: t.reviews.r1Role, init: "AC" },
-                                    { text: t.reviews.r2, auth: t.reviews.r2Auth, role: t.reviews.r2Role, init: "ML" },
-                                    { text: t.reviews.r3, auth: t.reviews.r3Auth, role: t.reviews.r3Role, init: "SJ" }
-                                ].map((review, i) => (
-                                    <div key={i} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                                        <div className="flex text-wood mb-4 gap-1">
-                                            <i className="ph-fill ph-star"></i><i className="ph-fill ph-star"></i><i className="ph-fill ph-star"></i><i className="ph-fill ph-star"></i><i className="ph-fill ph-star"></i>
-                                        </div>
-                                        <p className="text-gray-600 font-light italic mb-6">"{review.text}"</p>
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold text-gray-500">{review.init}</div>
-                                            <div>
-                                                <p className="text-sm font-bold text-charcoal">{review.auth}</p>
-                                                <p className="text-xs text-gray-400">{review.role}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Contact & Footer Section */}
-                    <section id="contact" className="bg-charcoal text-white pt-20 pb-10">
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16 border-b border-gray-700 pb-16">
-                                
-                                <div className="lg:col-span-1">
-                                    <a href="#" className="font-serif text-3xl font-bold tracking-tight text-white flex items-center gap-2 mb-6">
-                                        <i className="ph ph-bowl-food text-crimson"></i>
-                                        Tengu
+                            <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto mt-10">
+                                <span className="block text-wood font-medium tracking-widest uppercase mb-4 text-sm md:text-base">{t.hero.welcome}</span>
+                                <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold text-white leading-tight mb-6 drop-shadow-lg">
+                                    {t.hero.title1} <br />
+                                    <span className="italic text-wood">{t.hero.title2}</span>
+                                </h1>
+                                <p className="mt-4 text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto font-light">
+                                    {t.hero.desc}
+                                </p>
+                                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                                    <a href="#menu" className="bg-crimson text-white px-8 py-4 rounded-full font-medium hover:bg-red-800 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+                                        <i className="ph ph-book-open text-xl"></i>
+                                        {t.hero.btnMenu}
                                     </a>
-                                    <p className="text-gray-400 font-light mb-6">{t.footer.desc}</p>
-                                    <div className="flex gap-4">
-                                        <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-crimson transition-colors"><i className="ph ph-instagram-logo text-xl"></i></a>
-                                        <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-crimson transition-colors"><i className="ph ph-facebook-logo text-xl"></i></a>
-                                        <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-crimson transition-colors"><i className="ph ph-twitter-logo text-xl"></i></a>
+                                    <a href="#contact" className="bg-white/10 backdrop-blur-md border border-white/30 text-white px-8 py-4 rounded-full font-medium hover:bg-white/20 transition-all flex items-center justify-center gap-2">
+                                        <i className="ph ph-map-pin text-xl"></i>
+                                        {t.hero.btnFind}
+                                    </a>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* About Section */}
+                        <section id="about" className="py-20 md:py-32 bg-cream">
+                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 items-center">
+                                    <div className="relative">
+                                        <img src="https://images.unsplash.com/photo-1585032226651-759b368d7246?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Chef preparing ramen" className="rounded-2xl shadow-2xl object-cover h-[500px] w-full" />
+                                        <div className="absolute -bottom-6 -right-6 bg-white p-6 rounded-xl shadow-xl hidden md:block border border-gray-100">
+                                            <p className="font-serif text-4xl text-crimson font-bold">18<span className="text-2xl text-charcoal font-sans">hrs</span></p>
+                                            <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">{t.about.simmering}</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h2 className="text-crimson font-medium tracking-widest uppercase text-sm mb-3">{t.about.label}</h2>
+                                        <h3 className="text-3xl md:text-5xl font-serif font-bold text-charcoal mb-6 leading-tight">{t.about.title}</h3>
+                                        <div className="space-y-4 text-gray-600 leading-relaxed text-lg font-light">
+                                            <p>{t.about.p1}</p>
+                                            <p>{t.about.p2}</p>
+                                            <p>{t.about.p3}</p>
+                                        </div>
+                                        <div className="mt-8">
+                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Signature_of_Kenji_Goto.svg/512px-Signature_of_Kenji_Goto.svg.png" alt="Chef Signature" className="h-12 opacity-60 mix-blend-multiply" onError={(e) => e.target.style.display='none'} />
+                                            <p className="mt-2 font-serif font-bold text-charcoal">{t.about.chef}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Menu Section */}
+                        <section id="menu" className="py-20 md:py-32 bg-white">
+                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                                <div className="text-center max-w-3xl mx-auto mb-16">
+                                    <h2 className="text-crimson font-medium tracking-widest uppercase text-sm mb-3">{t.menu.label}</h2>
+                                    <h3 className="text-3xl md:text-5xl font-serif font-bold text-charcoal mb-6">{t.menu.title}</h3>
+                                    <p className="text-gray-600 text-lg font-light">{t.menu.desc}</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
+                                    
+                                    {/* Mapping over standard menu items */}
+                                    {t.menu.items.map((item, index) => (
+                                        <div key={index} className="menu-card bg-cream rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-full relative">
+                                            {index === 1 && (
+                                                <div className="absolute top-4 right-4 bg-wood text-white text-xs font-bold px-3 py-1 rounded-full z-10 uppercase tracking-wide">
+                                                    {t.menu.pick}
+                                                </div>
+                                            )}
+                                            <img src={item.img} alt={item.name} className="w-full h-64 object-cover" />
+                                            <div className="p-8 flex flex-col flex-grow">
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <h4 className="text-xl font-serif font-bold text-charcoal">{item.name}</h4>
+                                                    <span className="text-crimson font-bold text-xl ml-4 whitespace-nowrap">{item.price}</span>
+                                                </div>
+                                                <p className="text-gray-600 font-light mb-6 flex-grow">{item.desc}</p>
+                                                <button className="w-full py-3 border border-crimson text-crimson font-medium rounded-full hover:bg-crimson hover:text-white transition-colors">
+                                                    {t.menu.pickup}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {/* Side Item (Gyoza) */}
+                                    <div className="menu-card bg-cream rounded-2xl overflow-hidden border border-gray-100 flex flex-col h-full lg:col-span-3 lg:flex-row">
+                                        <div className="lg:w-1/3">
+                                            <img src={t.menu.side.img} alt={t.menu.side.name} className="w-full h-64 lg:h-full object-cover" />
+                                        </div>
+                                        <div className="p-8 lg:w-2/3 flex flex-col justify-center">
+                                            <div className="flex justify-between items-start mb-4 flex-col sm:flex-row">
+                                                <h4 className="text-2xl font-serif font-bold text-charcoal mb-2 sm:mb-0">{t.menu.side.name}</h4>
+                                                <span className="text-crimson font-bold text-xl sm:ml-4">{t.menu.side.price}</span>
+                                            </div>
+                                            <p className="text-gray-600 font-light mb-6 text-lg">{t.menu.side.desc}</p>
+                                            <div className="flex gap-4">
+                                                <button className="w-full sm:w-auto px-8 py-3 bg-charcoal text-white font-medium rounded-full hover:bg-black transition-colors">
+                                                    {t.menu.add}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Reviews Section */}
+                        <section id="reviews" className="py-20 md:py-32 bg-cream">
+                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                                <div className="text-center max-w-3xl mx-auto mb-16">
+                                    <i className="ph-fill ph-quotes text-5xl text-wood/40 mb-4 inline-block"></i>
+                                    <h3 className="text-3xl md:text-5xl font-serif font-bold text-charcoal mb-6">{t.reviews.title}</h3>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    {[
+                                        { text: t.reviews.r1, auth: t.reviews.r1Auth, role: t.reviews.r1Role, init: "AC" },
+                                        { text: t.reviews.r2, auth: t.reviews.r2Auth, role: t.reviews.r2Role, init: "ML" },
+                                        { text: t.reviews.r3, auth: t.reviews.r3Auth, role: t.reviews.r3Role, init: "SJ" }
+                                    ].map((review, i) => (
+                                        <div key={i} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                                            <div className="flex text-wood mb-4 gap-1">
+                                                <i className="ph-fill ph-star"></i><i className="ph-fill ph-star"></i><i className="ph-fill ph-star"></i><i className="ph-fill ph-star"></i><i className="ph-fill ph-star"></i>
+                                            </div>
+                                            <p className="text-gray-600 font-light italic mb-6">"{review.text}"</p>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold text-gray-500">{review.init}</div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-charcoal">{review.auth}</p>
+                                                    <p className="text-xs text-gray-400">{review.role}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Contact & Footer Section */}
+                        <section id="contact" className="bg-charcoal text-white pt-20 pb-10">
+                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16 border-b border-gray-700 pb-16">
+                                    
+                                    <div className="lg:col-span-1">
+                                        <a href="#" className="font-serif text-3xl font-bold tracking-tight text-white flex items-center gap-2 mb-6">
+                                            <i className="ph ph-bowl-food text-crimson"></i>
+                                            Tengu
+                                        </a>
+                                        <p className="text-gray-400 font-light mb-6">{t.footer.desc}</p>
+                                        <div className="flex gap-4">
+                                            <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-crimson transition-colors"><i className="ph ph-instagram-logo text-xl"></i></a>
+                                            <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-crimson transition-colors"><i className="ph ph-facebook-logo text-xl"></i></a>
+                                            <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-crimson transition-colors"><i className="ph ph-twitter-logo text-xl"></i></a>
+                                        </div>
+                                    </div>
+
+                                    <div className="lg:col-span-1">
+                                        <h4 className="font-serif text-xl font-bold mb-6 text-wood">{t.footer.find}</h4>
+                                        <ul className="space-y-4 text-gray-300 font-light">
+                                            <li className="flex items-start gap-3">
+                                                <i className="ph ph-map-pin text-xl text-crimson mt-1"></i>
+                                                <span dangerouslySetInnerHTML={{ __html: t.footer.address }}></span>
+                                            </li>
+                                            <li className="flex items-center gap-3">
+                                                <i className="ph ph-phone text-xl text-crimson"></i>
+                                                <span>+886 2 1234 5678</span>
+                                            </li>
+                                            <li className="flex items-center gap-3">
+                                                <i className="ph ph-envelope text-xl text-crimson"></i>
+                                                <span>hello@tenguramen.tw</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="lg:col-span-1">
+                                        <h4 className="font-serif text-xl font-bold mb-6 text-wood">{t.footer.hours}</h4>
+                                        <ul className="space-y-4 text-gray-300 font-light">
+                                            <li className="flex justify-between border-b border-gray-700 pb-2">
+                                                <span>{t.footer.days1}</span>
+                                                <span className="text-right">11:30 - 14:30<br/>17:30 - 21:30</span>
+                                            </li>
+                                            <li className="flex justify-between border-b border-gray-700 pb-2">
+                                                <span>{t.footer.days2}</span>
+                                                <span className="text-right">11:30 - 15:00<br/>17:30 - 22:30</span>
+                                            </li>
+                                            <li className="flex justify-between pb-2 text-crimson">
+                                                <span>{t.footer.sun}</span>
+                                                <span>{t.footer.closed}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="lg:col-span-1">
+                                        <h4 className="font-serif text-xl font-bold mb-6 text-wood">{t.footer.updates}</h4>
+                                        <p className="text-gray-400 font-light mb-4">{t.footer.subDesc}</p>
+                                        <form onSubmit={(e) => { e.preventDefault(); alert(t.footer.alert); }} className="flex flex-col gap-3">
+                                            <input type="email" placeholder={t.footer.email} required className="bg-gray-800 border border-gray-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-crimson transition-colors" />
+                                            <button type="submit" className="bg-crimson text-white px-4 py-3 rounded-lg font-medium hover:bg-red-800 transition-colors">{t.footer.subBtn}</button>
+                                        </form>
                                     </div>
                                 </div>
 
-                                <div className="lg:col-span-1">
-                                    <h4 className="font-serif text-xl font-bold mb-6 text-wood">{t.footer.find}</h4>
-                                    <ul className="space-y-4 text-gray-300 font-light">
-                                        <li className="flex items-start gap-3">
-                                            <i className="ph ph-map-pin text-xl text-crimson mt-1"></i>
-                                            <span dangerouslySetInnerHTML={{ __html: t.footer.address }}></span>
-                                        </li>
-                                        <li className="flex items-center gap-3">
-                                            <i className="ph ph-phone text-xl text-crimson"></i>
-                                            <span>+886 2 1234 5678</span>
-                                        </li>
-                                        <li className="flex items-center gap-3">
-                                            <i className="ph ph-envelope text-xl text-crimson"></i>
-                                            <span>hello@tenguramen.tw</span>
-                                        </li>
-                                    </ul>
-                                </div>
-
-                                <div className="lg:col-span-1">
-                                    <h4 className="font-serif text-xl font-bold mb-6 text-wood">{t.footer.hours}</h4>
-                                    <ul className="space-y-4 text-gray-300 font-light">
-                                        <li className="flex justify-between border-b border-gray-700 pb-2">
-                                            <span>{t.footer.days1}</span>
-                                            <span className="text-right">11:30 - 14:30<br/>17:30 - 21:30</span>
-                                        </li>
-                                        <li className="flex justify-between border-b border-gray-700 pb-2">
-                                            <span>{t.footer.days2}</span>
-                                            <span className="text-right">11:30 - 15:00<br/>17:30 - 22:30</span>
-                                        </li>
-                                        <li className="flex justify-between pb-2 text-crimson">
-                                            <span>{t.footer.sun}</span>
-                                            <span>{t.footer.closed}</span>
-                                        </li>
-                                    </ul>
-                                </div>
-
-                                <div className="lg:col-span-1">
-                                    <h4 className="font-serif text-xl font-bold mb-6 text-wood">{t.footer.updates}</h4>
-                                    <p className="text-gray-400 font-light mb-4">{t.footer.subDesc}</p>
-                                    <form onSubmit={(e) => { e.preventDefault(); alert(t.footer.alert); }} className="flex flex-col gap-3">
-                                        <input type="email" placeholder={t.footer.email} required className="bg-gray-800 border border-gray-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-crimson transition-colors" />
-                                        <button type="submit" className="bg-crimson text-white px-4 py-3 rounded-lg font-medium hover:bg-red-800 transition-colors">{t.footer.subBtn}</button>
-                                    </form>
+                                <div className="text-center text-gray-500 text-sm">
+                                    <p>{t.footer.rights}</p>
                                 </div>
                             </div>
-
-                            <div className="text-center text-gray-500 text-sm">
-                                <p>{t.footer.rights}</p>
-                            </div>
-                        </div>
-                    </section>
+                        </section>
+                    </main>
                 </div>
             );
         };
